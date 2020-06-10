@@ -23,7 +23,7 @@ resources: {}
   #   memory: 1536Mi
   # requests:
   #   cpu: 100m
-  #   memory: 1024Mi
+#   memory: 1024Mi
 kafkaHeapOptions: "-Xmx1G -Xms1G"
 
 ## Optional Container Security context
@@ -165,10 +165,10 @@ podAnnotations: {}
 # Labels to be added to Kafka pods
 podLabels: {}
   # service: broker
-  # team: developers
+# team: developers
 
 podDisruptionBudget: {}
-  # maxUnavailable: 1  # Limits how many Kafka pods may be unavailable due to voluntary disruptions.
+# maxUnavailable: 1  # Limits how many Kafka pods may be unavailable due to voluntary disruptions.
 
 ## Configuration Overrides. Specify any Kafka settings you would like set on the StatefulSet
 ## here in map format, as defined in the official docs.
@@ -198,7 +198,7 @@ configurationOverrides:
   #   EXTERNAL://${LOAD_BALANCER_IP}:31090
   ## Uncomment to define the EXTERNAL Listener protocol
   "listener.security.protocol.map": |-
-    PLAINTEXT:PLAINTEXT,SSL:SSL,EXTERNAL:SSL
+    PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
 
 ## set extra ENVs
 #   key: "value"
@@ -252,7 +252,7 @@ jmx:
       # lowercaseOutputLabelNames: true
       # ssl: false
       # rules:
-      # - pattern: ".*"
+    # - pattern: ".*"
 
     ## If you would like to supply your own ConfigMap for JMX metrics, supply the name of that
     ## ConfigMap as an `overrideName` here.
@@ -266,11 +266,11 @@ jmx:
   ## (warning its crazy excessive and they aren't formatted in a prometheus style) (1) `whitelistObjectNames: []`
   ## (2) commented out above `overrideConfig`.
   whitelistObjectNames:  # []
-  - kafka.controller:*
-  - kafka.server:*
-  - java.lang:*
-  - kafka.network:*
-  - kafka.log:*
+    - kafka.controller:*
+    - kafka.server:*
+    - java.lang:*
+    - kafka.network:*
+    - kafka.log:*
 
 ## Prometheus Exporters / Metrics
 ##
@@ -300,7 +300,7 @@ prometheus:
       #   memory: 1Gi
       # requests:
       #   cpu: 100m
-      #   memory: 100Mi
+    #   memory: 100Mi
 
   ## Prometheus Kafka Exporter: exposes complimentary metrics to JMX Exporter
   kafka:
@@ -323,12 +323,12 @@ prometheus:
 
     ## Resource limits
     resources: {}
-#      limits:
-#        cpu: 200m
-#        memory: 1Gi
-#      requests:
-#        cpu: 100m
-#        memory: 100Mi
+    #      limits:
+    #        cpu: 200m
+    #        memory: 1Gi
+    #      requests:
+    #        cpu: 100m
+    #        memory: 100Mi
 
     # Tolerations for nodes that have taints on them.
     # Useful if you want to dedicate nodes to just run kafka-exporter
@@ -397,20 +397,20 @@ prometheus:
       ## Some example rules.
       ## e.g. max(kafka_controller_kafkacontroller_activecontrollercount_value{service="my-kafka-release"}) by (service) < 1
       rules:
-      - alert: KafkaNoActiveControllers
-        annotations:
-          message: The number of active controllers in {{ "{{" }} $labels.namespace {{ "}}" }} is less than 1. This usually means that some of the Kafka nodes aren't communicating properly. If it doesn't resolve itself you can try killing the pods (one by one whilst monitoring the under-replicated partitions graph).
-        expr: max(kafka_controller_kafkacontroller_activecontrollercount_value) by (namespace) < 1
-        for: 5m
-        labels:
-          severity: critical
-      - alert: KafkaMultipleActiveControllers
-        annotations:
-          message: The number of active controllers in {{ "{{" }} $labels.namespace {{ "}}" }} is greater than 1. This usually means that some of the Kafka nodes aren't communicating properly. If it doesn't resolve itself you can try killing the pods (one by one whilst monitoring the under-replicated partitions graph).
-        expr: max(kafka_controller_kafkacontroller_activecontrollercount_value) by (namespace) > 1
-        for: 5m
-        labels:
-          severity: critical
+        - alert: KafkaNoActiveControllers
+          annotations:
+            message: The number of active controllers in {{ "{{" }} $labels.namespace {{ "}}" }} is less than 1. This usually means that some of the Kafka nodes aren't communicating properly. If it doesn't resolve itself you can try killing the pods (one by one whilst monitoring the under-replicated partitions graph).
+          expr: max(kafka_controller_kafkacontroller_activecontrollercount_value) by (namespace) < 1
+          for: 5m
+          labels:
+            severity: critical
+        - alert: KafkaMultipleActiveControllers
+          annotations:
+            message: The number of active controllers in {{ "{{" }} $labels.namespace {{ "}}" }} is greater than 1. This usually means that some of the Kafka nodes aren't communicating properly. If it doesn't resolve itself you can try killing the pods (one by one whilst monitoring the under-replicated partitions graph).
+          expr: max(kafka_controller_kafkacontroller_activecontrollercount_value) by (namespace) > 1
+          for: 5m
+          labels:
+            severity: critical
 
 ## Kafka Config job configuration
 ##
@@ -457,8 +457,8 @@ topics: []
   #         - Read
   #         - Write
   #     - user: all
-  #       operations: [ All ]
-testsEnabled: false
+#       operations: [ All ]
+
 # ------------------------------------------------------------------------------
 # Zookeeper:
 # ------------------------------------------------------------------------------
