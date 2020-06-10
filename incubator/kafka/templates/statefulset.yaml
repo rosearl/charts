@@ -138,6 +138,30 @@ spec:
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         env:
+        - name: KAFKA_SSL_KEYSTORE_FILENAME
+          value: kafka.broker.keystore.jks
+        - name: KAFKA_SSL_KEYSTORE_CREDENTIALS
+          value: keystore-creds
+        - name: KAFKA_SSL_TRUSTSTORE_FILENAME
+          value: kafka.broker.truststore.jks
+        - name: KAFKA_SSL_TRUSTSTORE_CREDENTIALS
+          value: truststore-creds
+        - name: KAFKA_SSL_KEY_CREDENTIALS
+          value: key-creds
+        - name: KAFKA_SECURITY_INTER_BROKER_LISTENER_NAME
+          value: SSL
+        - name: KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM
+          value: ' '
+        - name: KAFKA_SSL_CLIENT_AUTH
+          value: none
+        - name: KAFKA_AUTHORIZER_CLASS_NAME
+          value: kafka.security.auth.SimpleAclAuthorizer
+        - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+          value: SSL:SSL,PLAINTEXT:PLAINTEXT,EXTERNAL:SSL
+        - name: KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND
+          value: "true"
+        - name: KAFKA_INTER_BROKER_LISTENER_NAME
+          value: SSL
         {{- if .Values.prometheus.jmx.enabled }}
         - name: JMX_PORT
           value: "{{ .Values.jmx.port }}"
@@ -203,12 +227,16 @@ spec:
           export LOAD_BALANCER_IP=$(echo '{{ .Values.external.loadBalancerIP }}' | tr -d '[]' | cut -d ' ' -f "$(($KAFKA_BROKER_ID + 1))") && \
           {{- end }}
           {{- if eq .Values.external.type "NodePort" }}
-          export KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://${POD_IP}:9092{{ if kindIs "string" $advertisedListenersOverride }}{{ printf ",%s" $advertisedListenersOverride }}{{ end }} && \
+          export KAFKA_ADVERTISED_LISTENERS=SSL://${POD_IP}:9092{{ if kindIs "string" $advertisedListenersOverride }}{{ printf ",%s" $advertisedListenersOverride }}{{ end }} && \
+          export KAFKA_SSL_KEYSTORE_LOCATION=/etc/kafka/secrets/kafka-${KAFKA_BROKER_ID}-keystore.jks && \
           {{- else }}
-          export KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://${POD_NAME}.{{ include "kafka.fullname" . }}-headless.${POD_NAMESPACE}.svc.cluster.local:9092{{ if kindIs "string" $advertisedListenersOverride }}{{ printf ",%s" $advertisedListenersOverride }}{{ end }} && \
+          export KAFKA_ADVERTISED_LISTENERS=SSL://${POD_NAME}.{{ include "kafka.fullname" . }}-headless.${POD_NAMESPACE}.svc.cluster.local:9092{{ if kindIs "string" $advertisedListenersOverride }}{{ printf ",%s" $advertisedListenersOverride }}{{ end }} && \
           {{- end }}
+          export KAFKA_SSL_KEYSTORE_LOCATION=/etc/kafka/secrets/kafka-${KAFKA_BROKER_ID}-keystore.jks && \
           exec /etc/confluent/docker/run
         volumeMounts:
+        - name: secrets-vol
+          mountPath: /etc/kafka/secrets
         - name: datadir
           mountPath: {{ .Values.persistence.mountPath | quote }}
         {{- range $secret := .Values.secrets }}
@@ -228,6 +256,9 @@ spec:
           {{- end }}
         {{- end }}
       volumes:
+      - name: secrets-vol
+        secret:
+          secretName: ssl-config
       {{- if not .Values.persistence.enabled }}
       - name: datadir
         emptyDir: {}
