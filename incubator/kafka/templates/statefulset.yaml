@@ -151,7 +151,7 @@ spec:
         - name: KAFKA_SECURITY_INTER_BROKER_LISTENER_NAME
           value: PLAINTEXT
         - name: KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM
-          value: ' '
+          value: ""
         - name: KAFKA_SSL_CLIENT_AUTH
           value: none
         - name: KAFKA_AUTHORIZER_CLASS_NAME
